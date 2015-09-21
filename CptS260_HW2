@@ -1,0 +1,157 @@
+# Matthew Harris
+# CptS 260: Introduction to Computer Architecture
+# Dr. Lewis
+# Homework 2
+
+bicalls
+    .option pic0
+    
+    .rdata # read-only data
+    
+    .align  2
+resultFormat:
+    .asciz  "(%d/%u)\n"
+    
+    .text
+    .align  2
+    .globl  main
+    .set    nomips16
+    .ent    main
+    .type   main, @function # tells the symbol table that `main` is a function
+    
+rat_print:
+    # ($a0, $a1) -> () (no output registers)
+    # prints "(i/j)" on stdout, where i = $a0 and j = $a1
+    addiu $sp, $sp, -4
+    sw    $ra, ($sp)
+    
+    move $a2, $a1    
+    move $a1, $a0
+    la   $a0, resultFormat
+    jal  printf
+    
+    lw    $ra, ($sp)
+    addiu $sp, $sp, +4
+
+    jr    $ra
+
+# put your additional rat_* functions here
+
+rat_mult:
+  mult	$a0, $a2
+  mflo  $v0
+  mult  $a1, $a3
+  mflo  $v1
+  jr    $ra
+
+rat_add:
+  mult  $a0, $a3
+  mflo  $t0
+  mult  $a1, $a3
+  mflo  $t1
+  mult  $a1, $a2
+  mflo  $t2
+  add   $v0, $t0, $t2
+  add   $v0, $t1, $0
+
+  jr    $ra
+
+rat_sub:
+  multi $a2, -1
+  mflo  $a2
+
+  add   $s0, $ra, $0
+  jal   rat_add
+  add   $ra, $s0, $0
+
+  jr    $ra
+
+rat_div:
+  add   $t0, $a2, $0
+  add   $a2, $a3, $0
+  add   $a3, $t0, $0
+			#need to remember to make the numerator carry the sign
+  add   $s0, $ra, $0
+  jal   rat_mult
+  add   $ra, $s0, $0
+
+  jr    $ra
+
+rat_gcd: #As found in the examples posted online (modified slightly):
+
+			        # This is Euclid's algorithm.
+    div     $0, $s0, $s1 	# results are in `lo` and `hi` registers
+    mfhi    $s2    		# copy `c`, the remainder, from the `hi` register to $s2
+    beq     $s2, $0, $ra	# jump to the return address in $ra if no remainder is found
+    move    $s0, $s1 # a = b
+    move    $s1, $s2 # b = c	# (TODO) figure out where the result is being stored ($s0 or $s1) and put it in $v0
+    j       euclid
+
+rat_simplify:
+
+	add	$s3, $ra, $0
+	add	$s0, $a0, $0
+	add	$s1, $a1, $0
+	jal	rat_gcd
+	
+	div	$a0, $v0
+	mflo	$a0
+	div	$a1, $v0
+	mflo	$v1
+	add	$v0, $a0, $0
+
+	jr $ra
+
+main:
+    # Need to allocate F words in the frame, where
+    # F = A + L + P + (1 for $ra if needed) + (1 for $fp if in use) + padding
+    # In this case,
+    #  A = 2 (maximum) arguments for called functions (scanf() and printf())
+    #  L = 0 words for local data
+    #  P = 8 for reserved registers ($s0 - $s7)
+    #  +1: $ra needed (this is a non-leaf function)
+    #  +1: $fp is in use
+    # padding is 0, since F is a multiple of 2 words (8 bytes)
+    # Hence,
+    # F = 2 + 8 + 1 + 1 = 12 words, hence 48 bytes
+
+    .frame  $fp, 48, $ra        # vars= 16, regs= 2/0, args= 16, gp= 8
+    
+    # push the return address and frame pointer on the stack
+    addiu   $sp, $sp, -48 # 48 = 4 * F
+    sw      $ra, 44($sp)
+    sw      $fp, 40($sp)
+    move    $fp, $sp # frame pointer is ready for callee
+    
+    # ------ Test code begins here.
+    
+    # Put some test code here for your rat_* routines. (The instructor
+    # will have a different test "main", but you'll want to test your
+    # code for yourself.)
+    
+    # Here is an example of a call to rat_print()
+
+    li      $a0,1
+    li      $a1,2
+    jal     rat_print
+
+	li      $a0,1
+    li      $a1,-2
+    li      $a2,2
+	li      $a3,7
+    jal     rat_mul
+    # result:
+    # $v0: numerator
+    # $v1: denominator
+
+    # ------ Test code ends here.
+
+    # pop the return address and frame pointers off the stack
+    move    $sp, $fp
+    lw      $ra, 44($sp)
+    lw      $fp, 40($sp)
+    addiu   $sp, $sp, 48
+    jr      $ra
+
+    .end    main
+    .size   main, .-main
