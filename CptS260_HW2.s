@@ -33,6 +33,10 @@ rat_print:
     lw    $ra, ($sp)
     addiu $sp, $sp, +4
 
+    add	$s1, $ra, $0
+    jal	rat_simplify
+    add	$ra, $s1, $0
+
     jr    $ra
 
 # put your additional rat_* functions here
@@ -42,6 +46,11 @@ rat_mul:
   mflo  $v0
   mult  $a1, $a3
   mflo  $v1
+
+  add	$s1, $ra, $0
+  jal	rat_simplify
+  add	$ra, $s1, $0
+
   jr    $ra
 
 rat_add:
@@ -55,6 +64,10 @@ rat_add:
   add   $v0, $t0, $t2
   add   $v1, $t1, $0
 
+  add	$s1, $ra, $0
+  jal	rat_simplify
+  add	$ra, $s1, $0
+
   jr    $ra
 
 rat_sub:
@@ -64,34 +77,36 @@ rat_sub:
   jal   rat_add
   add   $ra, $s0, $0
 
+  #No need to call rat_simplify as it was performed in rat_add before returning here
+
   jr    $ra
 
 rat_div:
-#ignore the comments. That's just me being crazy
-  add   $t0, $a2, $0
-  add   $a2, $a3, $0
-  add   $a3, $t0, $0
  
+  add	$t0, $a2, $0
+  add	$a2, $a3, $0
+  add	$a3, $t0, $0
+
+  ble	$a3, $0, rat_flipsign
+  
+  return_div: 
   add	$s0, $ra, $0 
-  #$ra = PC
-#  ble	$a3, $0, rat_flip			
   jal   rat_mul
   add   $ra, $s0, $0
 
- # add	$s1, $ra, $0
- # jal	rat_simplify
- # add	$ra, $s1, $0
+  #No need to call rat_simplify as it was performed in rat_mul before returning here
 
   jr    $ra
-rat_flip:
+
+rat_flipsign:
 
   li	$t0, -1
   mult	$a2, $t0
   mflo	$a2
   mult	$a3, $t0
-  mflo	$a2
+  mflo	$a3
 
-  jr	$ra
+  j	return_div
 
 rat_gcd: #As found in the examples posted online (modified slightly):
 
@@ -100,24 +115,23 @@ rat_gcd: #As found in the examples posted online (modified slightly):
     mfhi    $t2    		# copy `c`, the remainder, from the `hi` register to $s2
     beq     $t2, $0, rat_jump	# jump to the return address in $ra if no remainder is found
     move    $a0, $a1 # a = b
-    move    $a1, $t2 # b = c	# (TODO) figure out where the result is being stored ($a0 or $a1) and put it in $v0
-    add		$s2, $ra, $0
-    jal rat_print
-    add		$ra, $s2, $0
+    move    $a1, $t2 # b = c 
+   
     j       rat_gcd
 
 rat_jump:
 	jr	$ra
+
 rat_simplify:
 
-	add	$s0, $ra, $0
+	add	$s2, $ra, $0
 	add	$a0, $v0, $0
 	add	$a1, $v1, $0
 	jal	rat_gcd
-	add	$ra, $s0, $0	
-	div	$v0, $t0
+	add	$ra, $s2, $0	
+	div	$v0, $a1
 	mflo	$v0
-	div	$v1, $t0
+	div	$v1, $a1
 	mflo	$v1
 
 	jr $ra
@@ -149,21 +163,15 @@ main:
     # will have a different test "main", but you'll want to test your
     # code for yourself.)
     
-    # Here is an example of a call to rat_print()
-
-    li      $a0,1
+    li      $a0,4
     li      $a1,2
-    jal     rat_print
-
-    li      $a0,2
-    li      $a1,2
-    li      $a2,-1
-    li      $a3,2
+    li      $a2,-2
+    li      $a3,1
     jal     rat_div
     move	$a0, $v0
     move	$a1, $v1
     
-    jal rat_print
+    jal rat_print 
 
     # result:
     # $v0: numerator
