@@ -1,0 +1,23 @@
+#!/bin/bash
+
+
+if (( $# >= 1 ))
+then
+
+	if (( $# == 2 ))
+	then
+		spacing=$2
+	fi
+
+	cat $1 | while read i
+	do 
+		for ((x = 0; x < $2; x++))
+		do
+			echo
+		done
+		echo $i
+	done
+else
+	echo "You fool! you didn't specify a file"
+fi
+echo

@@ -1,0 +1,23 @@
+#!/bin/bash
+
+LIMIT=$#
+odd=0
+even=0
+total=0
+
+for ((i = 0; i < LIMIT; i++))
+do
+	total=$((total+$1))
+	if (( $1 % 2 == 0 ))
+	then
+		even=$((even+1))
+	else
+		odd=$((odd+1))
+	fi
+	shift
+done
+echo There were $((LIMIT)) numbers
+echo There were $((even)) even numbers
+echo There were $((odd)) odd numbers
+echo -n "The average of the numbers is " 
+echo  "$total/$LIMIT" | bc -l
