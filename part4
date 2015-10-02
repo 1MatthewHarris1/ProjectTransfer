@@ -1,0 +1,12 @@
+#!/bin/bash
+
+Alpha="Matthew"
+Beta=" "
+for ((i=0; i < 40; i++))
+do
+	for ((x=0; x < i; x++))
+	do
+		echo -n "$Beta"
+	done
+	echo $Alpha
+done
