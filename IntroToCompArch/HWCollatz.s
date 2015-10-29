@@ -1,4 +1,4 @@
-syscall for I/O
+#syscall for I/O
 #la
 
 .data
@@ -12,8 +12,9 @@ errorOutput:
 odd:
 	mult	$s0, $t2
 	mflo	$s0
+	mfhi	$t4
 	addi	$s0, $s0, 1
-	bne	$HI, $0, error
+	bne	$t4, $0, error
 		
 	j	beta
 
@@ -23,7 +24,7 @@ main:
 	addi	$t2, $0, 3	#$t2 = 3
 	
 	addi	$v0, $0, 4
-	syscall
+	#syscall
 
 	addi	$v0, $0, 5
 	syscall
@@ -33,7 +34,8 @@ main:
 
 alpha:
 	div	$s0, $t1	#divide uInput by 2
-	bne	$HI, $0, odd	#if(($s0 % 2) != 0) go to label odd
+	mfhi	$t4
+	bne	$t4, $0, odd	#if(($s0 % 2) != 0) go to label odd
 	mflo	$s0
 
 beta:
@@ -45,7 +47,7 @@ beta:
 	
 error:
 	addi	$v0, $0, 4
-	syscall
+	#syscall
 
 
 
