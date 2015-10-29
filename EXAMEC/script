@@ -1,0 +1,109 @@
+#!/bin/bash
+
+cake1="Yellow"
+cake2="Chocolate"
+cake3="White"
+
+color1="Red"
+color2="Blue"
+color3="White"
+color4="Green"
+color5="Brown"
+
+icing1="Butter Cream"
+icing2="Vanila"
+icing3="Lemon"
+icing4="Chocolate"
+
+sprinkles1="With Sprinkles =D"
+sprinkles2="Without Sprinkles ='("
+
+for ((i=0; i<3; i++))
+do
+	if (($i == 0))
+	then
+		cake=$cake1
+	elif (($i == 1))
+	then
+		cake=$cake2
+	elif (($i == 2))
+	then
+		cake=$cake3
+	fi
+
+
+	for ((j=0; j<5; j++))
+	do
+
+		if (($j == 0))
+		then
+			color=$color1
+		elif (($j == 1))
+		then
+			color=$color2
+		elif (($j == 2))
+		then
+			color=$color3
+		elif (($j == 3))
+		then
+			color=$color4
+		elif (($j == 4))
+		then
+			color=$color5
+		fi
+
+		for ((k=0; k<4; k++))
+		do
+			
+			if (($k == 0))
+			then
+				icing=$icing1
+			elif (($k == 1))
+			then
+				icing=$icing2
+			elif (($k == 2))
+			then
+				icing=$icing3
+			elif (($k == 3))
+			then
+				icing=$icing4
+			fi
+
+			for ((l=0; l<2; l++))
+			do
+				if (($l == 0))
+				then
+					sprinkles=$sprinkles1
+				elif (($l == 1))
+				then
+					sprinkles=$sprinkles2
+				fi
+
+				if (($k == 3))
+				then
+					color=$color5
+				fi
+				echo $cake "with" $color $icing "icing and" $sprinkles
+			done
+
+		done
+
+	done
+
+
+done
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
