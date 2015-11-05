@@ -1,22 +1,7 @@
-#syscall for I/O
-#la
+	.text
 
-.data
-uInput:
-	.ascii "Please input a positive integer: /000"
+	.globl main
 
-errorOutput:
-	.ascii "Your input caused an error/000"
-
-
-odd:
-	mult	$s0, $t2
-	mflo	$s0
-	mfhi	$t4
-	addi	$s0, $s0, 1
-	bne	$t4, $0, error
-		
-	j	beta
 
 main:
 	addi	$t0, $0, 1	#$t0 = 1
@@ -24,7 +9,8 @@ main:
 	addi	$t2, $0, 3	#$t2 = 3
 	
 	addi	$v0, $0, 4
-	#syscall
+	la	$a0, uInput
+	syscall
 
 	addi	$v0, $0, 5
 	syscall
@@ -43,14 +29,31 @@ beta:
 	addi	$a0, $s0, 0
 	syscall
 	bne	$s0, $t0, alpha	#if $s0 != 1 go to label alpha
+	j	exit
 	
+odd:
+	mult	$s0, $t2
+	mflo	$s0
+	mfhi	$t4
+	addi	$s0, $s0, 1
+	bne	$t4, $0, error
+		
+	j	beta
 	
 error:
+	la	$a0, errorOutput
 	addi	$v0, $0, 4
-	#syscall
+	syscall
 
+exit:
+	addi	$v0, $0, 10
+	syscall
 
+	.data
 
+uInput:		.ascii "Please input a positive integer: /000"
+
+errorOutput:	.ascii "Your input caused an error/000"
 
 
 
