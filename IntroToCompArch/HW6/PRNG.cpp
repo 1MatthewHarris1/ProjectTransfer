@@ -7,8 +7,11 @@ using namespace std;
 
 unsigned int PRNG()
 {
+	int nSeed = 0;
     // our initial starting seed is 5323
-    static unsigned int nSeed = 5323;
+	cout << endl << "Please input seed: ";
+	cin >> nSeed;
+    //static unsigned int nSeed = 5323;
 
     // Take the current seed and generate a new value from it
     // Due to our use of large constants and overflow, it would be
@@ -17,11 +20,13 @@ unsigned int PRNG()
     nSeed = (8253729 * nSeed + 2396403);
 
     // Take the seed and return a value between 0 and 32767
-    return nSeed  % 32767;
+    return nSeed  % 10;
 }
 
 int main()
 {
+	cout << endl << PRNG() << endl;
+/*
   // Print 100 random numbers
     for (int nCount=0; nCount < 100; ++nCount)
     {
@@ -31,4 +36,17 @@ int main()
         if ((nCount+1) % 5 == 0)
             cout << endl;
     }
+*/
 }
+
+
+
+
+
+
+
+
+
+
+
+
