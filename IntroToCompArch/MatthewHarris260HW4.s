@@ -9,7 +9,7 @@
 
 		uInput:		.asciiz "Please input a positive integer: /000"
 
-		errorOutput:	.asciiz "Your input caused an error/000"
+	errorOutput:	.asciiz "Your input caused an error/000"
 
 	.text
 

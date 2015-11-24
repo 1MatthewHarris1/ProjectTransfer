@@ -46,12 +46,15 @@
 
 	.text
 	.align  2
-	.globl  rng, seed
+	.globl  main, rng, seed
 	.set	nomips16
-	#.ent	main
-	#.type   main, @function # tells the symbol table that `main` is a function
+	#!!.ent	main
+	#!!.type   main, @function # tells the symbol table that `main` is a function
+	.ent rng
+	.type	rng, @function
+	.type	seed, @function
 
-	
+#!!main:
 rng:
 	.frame  $fp, 48, $ra        # vars= 16, regs= 2/0, args= 16, gp= 8
 	
@@ -62,43 +65,36 @@ rng:
 	move    $fp, $sp # frame pointer is ready for callee
 
 	#===============================================================
-	li	$s0, 8253729
-	li	$s1, 2396403
-	li	$s2, 10
 
-	jal	seed
-	mult	$v0, $s1
-	mflo	$t0
-	add	$s3, $t0, $s1
-	div	$s3, $s2
-	mfhi	$a1
-	la	$a0, intFormat
-	jal	printf
-	
-	addi	$t1, $ra, 0
-	jal	exit
+	addi	$s7, $ra, 0
 
-	#============================================================
+	addi	$s0, $a0, 0
+	li	$s2, 8253729
+	li	$s3, 2396403
 
-seed:
-	addi	$t1, $ra, 0
+	mult	$s1, $s2
+	mflo	$t1
+	add	$t1, $t1, $s3
+	addi	$s1, $t1, 0
+	div	$t1, $s0
+	mfhi	$v0
+	bge	$v0, $0, done
+	li	$t1, -1
+	mult	$v0, $t1
+	mflo	$v0
+	done:
+	j	exit
 
-	la	$a0, inSeed
-	jal	printf
+seed:	# void seed(int seed) // Updates seed (stored in $s1) with argument ($a0)
 
-	la	$a0, intFormat
-	la	$a1, scanResult
-	jal	scanf
+	addi	$s1, $a0, 0
 
-	lw	$v0, scanResult
-
-	addi	$ra, $t1, 0
 	jr	$ra
 
 exit:
-	addi	$ra, $t1, 0
+	addi	$ra, $s7, 0
 
-	jr	$ra
+	#============================================================
 
 	# pop the return address and frame pointers off the stack
 	move    $sp, $fp
@@ -106,5 +102,9 @@ exit:
 	lw      $fp, 40($sp)
 	addiu   $sp, $sp, 48
 
-	#.end	main
-	#.size   main, .-main
+	jr	$ra
+
+	#!!.end	main
+	#!!.size   main, .-main
+	.end rng
+	.size	rng, .-rng

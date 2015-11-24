@@ -1,6 +1,9 @@
 /*
-	Found here: http://stackoverflow.com/questions/15500621/c-c-algorithm-to-produce-same-pseudo-random-number-sequences-from-same-seed-on
-	Posted by username "average"
+	This random number generator was found here:
+	http://stackoverflow.com/questions/15500621/c-c-algorithm-to-produce-same-pseudo-random-number-sequences-from-same-seed-on
+
+	Posted by username: average
+
 */
 #include <iostream>
 using namespace std;

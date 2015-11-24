@@ -6,6 +6,48 @@
 	.align  2
 resultFormat:
 	.asciz  "%d\n"
+
+	.align	2
+inSeed:
+	.asciz	"Please enter a number to seed rng: "
+
+	.align	2
+intFormat:
+	.asciz	"%d"
+
+	.align	2
+newLine:
+	.asciz	"\n"
+
+	.align	2
+inputMessage:
+	.asciz	"Your guess? (0 - 1000): "
+
+	.align	2
+yourAnswerWas:
+	.asciz	"Your answer was "
+
+	.align	2
+tooLow:
+	.asciz	"too low "
+
+	.align	2
+tooHigh:
+	.asciz	"too high "
+
+	.align	2
+tryAgain:
+	.asciz	"try again\n"
+
+	.align	2
+winMessage:
+	.asciz	"correct! You WIN =D"
+
+	.data
+
+	.align	2
+scanResult:
+	.word	1
 	
 	.text
 	.align  2
@@ -39,19 +81,56 @@ main:
 	
 	# Here's how we set the seed. In the assignment, prompt the user
 	# for the seed value.
-	li      $a0, 123456
+
+	la	$a0, inSeed
+	jal	printf
+	la	$a0, intFormat
+	la	$a1, scanResult
+	jal	scanf
+	lw	$a0, scanResult
+	addi	$s5, $a0, 0
 	jal     seed
 
-	# Here's how to call rng(k)
-	li      $a0, 1000000  # = k
+	Alpha:
+
+	la	$a0, inputMessage
+	jal	printf
+	la	$a0, intFormat
+	la	$a1, scanResult
+	jal	scanf
+	lw	$s6, scanResult
+
+	addi	$a0, $s5, 0
+	jal	seed
+	li      $a0, 1000  # = k
 	jal     rng
+	addi	$s4, $v0, 0
 
-	# reminder of how to call printf().
-	la      $a0, resultFormat
-	move    $a1, $v0
-	jal     printf
+	la	$a0, yourAnswerWas
+	jal	printf
 
-	
+	bgt	$s6, $s4, high
+	blt	$s6, $s4, low
+
+	la	$a0, winMessage
+	jal	printf
+	la	$a0, newLine
+	jal	printf
+	j	exit
+
+	high:
+		la	$a0, tooHigh
+		j	Beta
+	low:
+		la	$a0, tooLow
+		j	Beta
+
+	Beta:
+		jal	printf
+		la	$a0, tryAgain
+		jal	printf
+		j	Alpha
+	exit:
 	
 	#----(implement "guess" above)----
 
