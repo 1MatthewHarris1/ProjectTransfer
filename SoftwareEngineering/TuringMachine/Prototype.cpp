@@ -159,8 +159,17 @@ void Command::comJunc()
 	{
 		cout << "Show" << endl;
 		cout << "Program: Turing Machine Simulator" << endl;
+		cout << "Course: Cpts 322" << endl;
+		cout << "Semester: Spring 2017" << endl;
+		cout << "Instructor: Niel Corrigan" << endl;
 		cout << "Version: 0.0.1" << endl;
 		cout << "Author: Matthew Harris" << endl;
+		cout << endl;
+		cout << "Configuration Settings:" << endl;
+		cout << "Maximum number of transitions: 100" << endl;
+		cout << "Truncation ammount: 3" << endl;
+		cout << "Turing Machine Name: TuringMachine_Alpha" << endl;
+		cout << "TM has not yet been run on an input string" << endl;
 		//notes.push_back("Not done with this command");
 		// Don't forget this
 	}
@@ -173,7 +182,7 @@ void Command::comJunc()
 	else if(com == "V")
 	{
 		cout << "View" << endl;
-		notes.push_back("TM = {}");
+		notes.push_back("TM = {Q, sigma, gamma, delta, q0, F}");
 		notes.push_back("States = {s1, s2, s3}");
 	}/*
 	else if(com == "CLEAR")
