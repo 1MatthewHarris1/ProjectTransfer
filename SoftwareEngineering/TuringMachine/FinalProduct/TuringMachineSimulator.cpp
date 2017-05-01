@@ -1,3 +1,15 @@
+/*
+Title:		TuringMachineSimulator
+University:	Washington State University Tri-Cities
+Class:		Computer Science 322
+Instructor:	Niel Corrigan
+Notes:
+
+	I have elected to write the entirety of this program in a single .cpp file
+	while I understand that this is bad practice, it has been useful due to the
+	design evolution that has occurred throughout the implementation process.
+*/
+
 #include<iostream>
 #include<string>
 #include<vector>
