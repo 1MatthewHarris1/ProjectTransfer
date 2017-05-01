@@ -972,16 +972,19 @@ int TuringMachine::run()
 		}
 
 
-		if(tape->end() == true)
+		if(tape->end() == true || detectedErrors == true)
 		{
 			//cout << "All done!" << endl;
 			complete = true;
 
-			for(int j = 0; j < finalStates.size(); j++)
+			if(detectedErrors == false)
 			{
-				if(currentState->name == finalStates[j].name)
+				for(int j = 0; j < finalStates.size(); j++)
 				{
-					accept = true;
+					if(currentState->name == finalStates[j].name)
+					{
+						accept = true;
+					}
 				}
 			}
 
