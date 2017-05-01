@@ -1,0 +1,27 @@
+New machine. This one should work without error.
+
+STATES: s0 s1 s2
+
+TAPE_ALPHABET: a b
+
+TRANSITION_FUNCTION:
+s0 a	s1 X R
+s0 b	s0 X R
+s0 X	s0 Y R
+s0 Y	s2 Y R
+s1 a	s2 X L
+s1 b	s0 X L
+s1 X	s1 Y R
+s1 Y	s1 Y R
+s2 a	s2 X R
+s2 b	s1 X R
+s2 X	s2 X R
+s2 Y	s0 Y L
+
+INITIAL_STATE: s0
+
+INPUT_ALPHABET: a b X Y Z
+
+BLANK_CHARACTER: -
+
+FINAL_STATES: s0 s2
