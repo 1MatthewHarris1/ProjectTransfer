@@ -1,0 +1,11 @@
+D: Delete:		Delete input string from list
+X: Exit:		Exit application
+H: Help:		Help user
+I: Insert:		Insert input string into list
+L: List:		List input strings
+Q: Quit:		Quit application of TM on input string
+R: Run:			Run TM on input string
+E: Set:			Set maximum number of transitions to perform
+W: Show:		Show status of application
+T: Truncate:		Truncate instantaneous descriptions
+V: View:		View TM
