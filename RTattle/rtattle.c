@@ -3,6 +3,8 @@
  *
  * adapted from Stevens & Rago (2nd. ed.) Figure 16.18
  */
+#define __USE_XOPEN
+#define _GNU_SOURCE
 #include <stdio.h>
 #include <getopt.h>
 #include <sys/socket.h>
@@ -18,6 +20,7 @@
 #define DBG printf("Here %d\n", BUGERATOR); BUGERATOR++;
 
 int BUGERATOR = 0;
+int ERROR_NO_READ = 0;
 
 struct Entry
 {
@@ -69,8 +72,19 @@ void remoteShell(char *host, char *command, int port)
 		else
 		{
 			//fwrite((void*)response, sizeof(char), responseLength, stdout);
+			if(response[0] == '~')
+			{
+				ERROR_NO_READ = 1;
+			}
 			response[responseLength] = '\0';
-			strcpy(EntryArray[EntryIndex].rawString, response);
+			if(ERROR_NO_READ == 1)
+			{
+				strcpy(EntryArray[EntryIndex].rawString, &response[1]);
+			}
+			else
+			{
+				strcpy(EntryArray[EntryIndex].rawString, response);
+			}
 			EntryIndex++;
 		}
 	}
@@ -112,7 +126,7 @@ int cmpFunc(const void* alpha, const void* beta)
 	struct tm aTM;
 	struct tm bTM;
 	double dif;
-	char temp[20];
+	char temp[50];
 
 	for(i = 0; i < strlen(((struct Entry*)alpha)->rawString); i++)
 	{
@@ -120,17 +134,19 @@ int cmpFunc(const void* alpha, const void* beta)
 		{
 			i++;
 			j = 0;
+			strcpy(temp, "");
 			while(((struct Entry*)alpha)->rawString[i] != '+')
 			{
 				temp[j] = ((struct Entry*)alpha)->rawString[i]; 
+				temp[j + 1] = '\0';
 				j++;
 				i++;
 			}
-			strcpy(temp, "");
 		}
 	}
 	
 	strptime(temp, "%D", &aTM);
+
 	
 	for(i = 0; i < strlen(((struct Entry*)beta)->rawString); i++)
 	{
@@ -138,30 +154,41 @@ int cmpFunc(const void* alpha, const void* beta)
 		{
 			i++;
 			j = 0;
+			strcpy(temp, "");
 			while(((struct Entry*)beta)->rawString[i] != '+')
 			{
 				temp[j] = ((struct Entry*)beta)->rawString[i]; 
 				j++;
 				i++;
 			}
-			strcpy(temp, "");
 		}
 	}
 
 	strptime(temp, "%D", &bTM);
 
+
+	aTM.tm_hour = 0;
+	aTM.tm_min = 0;
+	aTM.tm_sec = 0;
+
+	bTM.tm_hour = 0;
+	bTM.tm_min = 0;
+	bTM.tm_sec = 0;
+
 	aTime = mktime(&aTM);
 	bTime = mktime(&bTM);
 
+
 	dif = difftime(aTime, bTime);
+
 
 	if(dif < 0.0)
 	{
-		rVal = 1;
+		rVal = -1;
 	}
 	else if(dif > 0.0)
 	{
-		rVal = -1;
+		rVal = 1;
 	}
 	else
 	{
@@ -218,6 +245,20 @@ int main(int argc, char *argv[])
 	}
 
 	qsort(EntryArray, EntryIndex, sizeof(struct Entry), cmpFunc);
+
+/*
+login: the userâs login
+on host: the host the user logged in on
+tty: the line (control tty) the user logged in on
+log on: the time they logged on
+log off: one of
+from host: the host they logged in fromlogin: the userâs login
+*/
+	if(ERROR_NO_READ == 0)
+	{
+		printf("%-20s%-10s%-10s%20s%20s%20s\n", "login:", "line:", "log on:", "log off:", "from host:", "on host:");
+		printf("%-20s%-10s%-10s%20s%20s%20s\n", "------", "-----", "-------", "--------", "----------", "--------");
+	}
 	printEntries();
 
 	if(hosted == 0)

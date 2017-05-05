@@ -3,11 +3,7 @@ CC=gcc
 CFLAGS=-Wstrict-prototypes -Wall -g
 LDFLAGS=-g
 
-tattle:	tattle.o
-	$(CC) -g -o tattle tattle.o
-
-tattle.o:	tattle.c
-	$(CC) -c $(CFLAGS) $<
+all:	get_sockaddr.o daemonize_me.o rtattle rtattle.o tattled tattled.o 
 
 get_sockaddr.o: get_sockaddr.c
 	$(CC) -c $(CFLAGS) $<
@@ -35,13 +31,11 @@ daemonize_me.o:	daemonize_me.c
 clean:
 	rm -f ./sockaddr.o
 	rm -f ./rtattle.o
-	rm -f ./rtattled.o
+	rm -f ./tattled.o
 	rm -f ./daemonize_me.o
-	rm -f ./tattle.o
 
 .PHONY: immaculate
 immaculate: clean
 	rm -f ./get_sockaddr
 	rm -f ./rtattle
 	rm -f ./tattled
-	rm -f ./tattle

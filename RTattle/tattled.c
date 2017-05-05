@@ -1,3 +1,5 @@
+#define __USE_XOPEN
+#define _GNU_SOURCE
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
@@ -33,6 +35,7 @@
 #ifndef HOST_NAME_MAX
 #define HOST_NAME_MAX 256
 #endif
+
 
 /*
  * Ports less than this are not user-accessible.
@@ -92,7 +95,7 @@ Print to screen each element of the array which passes the filter settings.
 
 int initFileDesc(void)
 {
-	WTMP_FILE_DESC = open("/var/log/wtmp.1", O_RDONLY);
+	WTMP_FILE_DESC = open("/var/log/wtmp", O_RDONLY);
 
 	return 0;
 }
@@ -260,32 +263,15 @@ int cmpFunc(const void* alpha, const void* beta)
 		rVal = 0;
 	}
 
-/*
-	aTime = mktime(&((struct Entry*)alpha)->loginTime);
-	bTime = mktime(&((struct Entry*)beta)->loginTime);
-
-	if(aTime - bTime > 0)
-	{
-		rVal = 1;
-	}
-	else if(aTime - bTime < 0)
-	{
-		rVal = -1;
-	}
-	else
-	{
-		rVal = 0;
-	}
-*/
-
 	return rVal;
 }
 
-void parseUsers(char* uList)
+int parseUsers(char* uList)
 {
 	int i;
 	char tUser[50];
 	int tUserIndex = 0;
+	int rVal = 0;
 
 	for(i = 0; i < strlen(uList); i++)
 	{
@@ -303,8 +289,9 @@ void parseUsers(char* uList)
 			}
 			if(getpwnam(tUser) == NULL)
 			{
-				fprintf(stderr, "Error! Invalid user \"%s\"\n", tUser);
-				exit(-1);
+				rVal = 1;
+				//fprintf(stderr, "Error! Invalid user \"%s\"\n", tUser);
+				//exit(-1);
 			}
 			strcpy(sFilter.user[sFilter.userNum], tUser);
 			sFilter.userNum++;
@@ -312,55 +299,19 @@ void parseUsers(char* uList)
 		}
 	}
 
-	return;
+	return rVal;
 }
 
 void parseDate(char* date)
 {
-	//char timeBuff[50];
 
 	strptime(date, "%D", &sFilter.time);
-	//strftime(timeBuff, sizeof(timeBuff), "%D", &sFilter.time);
-	//printf("timeBuff: %s\n", timeBuff);
-
-	/*
-	char month[3];
-	char day[3];
-	char year[3];
-
-	//I'm sure there's a much better way to do this
-	month[0] = date[0];
-	month[1] = date[1];
-	month[2] = '\0';
-
-	day[0] = date[3];
-	day[1] = date[4];
-	day[2] = '\0';
-
-	year[0] = date[6];
-	year[1] = date[7];
-	year[2] = '\0';
-	*/
-
-	//sFilter.time.tm_mon = (atoi(month) - 1);
-	//sFilter.time.tm_mday = atoi(day);
-	/*
-	if(atoi(year) < 17)
-	{
-		//sFilter.time.tm_year = (atoi(year) + 100);
-	}
-	else
-	{
-		//sFilter.time.tm_year = atoi(year);
-	}
-	*/
 }
 
 void parseTime(char* time)
 {
 	char hour[3];
 	char min[3];
-	//char timeBuff[50];
 
 	hour[0] = time[0];
 	hour[1] = time[1];
@@ -446,20 +397,6 @@ int entryFilter(struct Entry* ePtr)
 		tempB->tm_min = 0;
 		tempB->tm_hour = 0;
 
-		/*
-		tempA->tm_hour = 0;
-		tempA->tm_min = 0;
-		tempB->tm_hour = 0;
-		tempB->tm_min = 0;
-		*/
-
-		/*
-		if(tempA->tm_year > 100)
-		{
-			tempA->tm_year -= 100;
-		}
-		*/
-
 		alpha = mktime(tempA);
 		beta = mktime(tempB);
 		dif = difftime(alpha, beta);
@@ -474,42 +411,6 @@ int entryFilter(struct Entry* ePtr)
 			//printf("dif: %lf\n\n", dif);
 		}
 
-		/*
-		strftime(timeBuff, sizeof(timeBuff), "%D", &ePtr->loginTime);
-		printf("ePtr->loginTime: %s\n", timeBuff);
-		printf("A: %d/%d/%d vs ", tempA->tm_mon, tempA->tm_mday, tempA->tm_year);
-		printf("B: %d/%d/%d\n", tempB->tm_mon, tempB->tm_mday, tempB->tm_year);
-		//getchar();
-		*/
-
-		/*
-		if(tempA->tm_mon == tempB->tm_mon)
-		{
-			if(tempA->tm_mday == tempB->tm_mday)
-			{
-				if(tempA->tm_year == tempB->tm_year)
-				{
-					//printf("Works by date\n");
-					byDate = 0;
-				}
-			}
-		}
-		*/
-		/*
-		time_t alpha = mktime(tempA);
-		time_t beta = mktime(tempB);
-		double dif = difftime(alpha, beta);
-
-		if(dif == 0.0)
-		{
-			byDate = 0;
-		}
-		else
-		{
-			printf("dif: %lf\n", dif);
-		}
-		*/
-
 		free(tempA);
 		free(tempB);
 	}
@@ -523,47 +424,45 @@ int entryFilter(struct Entry* ePtr)
 	{
 		tempA = (struct tm*)malloc(sizeof(struct tm));
 		tempB = (struct tm*)malloc(sizeof(struct tm));
-		int A;
-		int B;
 
 		//struct tm* current = localtime(time(NULL));
 
 		tempA->tm_min = ePtr->loginTime.tm_min;
 		tempA->tm_hour = ePtr->loginTime.tm_hour;
+		tempA->tm_sec = 0;
+		tempA->tm_mday = 1;
+		tempA->tm_mon = 1;
+		tempA->tm_year = 17;
 
 		tempB->tm_min = sFilter.min;
 		tempB->tm_hour = sFilter.hour;
+		tempB->tm_sec = 0;
+		tempB->tm_mday = 1;
+		tempB->tm_mon = 1;
+		tempB->tm_year = 17;
 		
+		alpha = mktime(tempA);
+		beta = mktime(tempB);
 
-		A = (100 * tempA->tm_hour) + tempA->tm_min;
-		B = (100 * tempB->tm_hour) + tempB->tm_min;
-		//printf("%d vs %d\n", A, B);
-
-		if(A < B)
+		dif = difftime(alpha, beta);
+		if(dif <= 0.0)
 		{
-			//printf("%d < %d\n", A, B);
 			tempA->tm_min = ePtr->logoutTime.tm_min;
 			tempA->tm_hour = ePtr->logoutTime.tm_hour;
-			A = (100 * tempA->tm_hour) + tempA->tm_min;
-
-			if(ePtr->logoutTime.tm_mday == ePtr->loginTime.tm_mday)
+			tempA->tm_sec = 0;
+			tempA->tm_mday = 1;
+			tempA->tm_mon = 1;
+			tempA->tm_year = 17;
+			
+			alpha = mktime(tempA);
+			dif = difftime(alpha, beta);
+			if(dif >= 0)
 			{
-				if(A > B)
-				{
-					//printf("Works by time\n");
-					byTime = 0;
-				}
-				else
-				{
-					//printf("%d < %d\n", A, B);
-				}
-			}
-			else
-			{
-				//printf("Works by time\n");
 				byTime = 0;
 			}
 		}
+		
+
 		free(tempA);
 		free(tempB);
 	}
@@ -591,13 +490,13 @@ int checkDate(char* date)
 
 	if(strlen(date) != 8)
 	{
-		rVal = -1;
+		rVal = 2;
 	}
 	else
 	{
 		if(date[2] != '/' || date[5] != '/')
 		{
-			rVal = -1;
+			rVal = 2;
 		}
 	}
 
@@ -610,13 +509,13 @@ int checkTime(char* time)
 
 	if(strlen(time) != 5)
 	{
-		rVal = -1;
+		rVal = 4;
 	}
 	else
 	{
 		if(time[2] != ':')
 		{
-			rVal = -1;	
+			rVal = 4;	
 		}
 	}
 
@@ -662,13 +561,18 @@ int myGetOpt(char myArgV[10][500], char* rString, int count, char option)
 	return rVal;
 }
 
-void parseCommand(char* command)
+int parseCommand(char* command)
 {
 	int i, j, k;
 	char myArgV[10][500];
 	char temp[500] = "";
-	char optionLetter;
-	int expArg = 0;
+	int rVal = 0;
+	
+	/*
+	char timeBuff[20];
+	struct tm* curTime;
+	time_t curTime_t;
+	*/
 	
 	j = 0;
 	k = 0;
@@ -684,7 +588,6 @@ void parseCommand(char* command)
 		{
 			temp[k] = '\0';
 			strcpy(myArgV[j], temp);
-			printf("%s\n", temp);
 			strcpy(temp, "");
 			j++;
 			k = 0;
@@ -693,14 +596,11 @@ void parseCommand(char* command)
 
 	if(myGetOpt(myArgV, temp, j, 'u') != -1)
 	{
-		printf("u specified\n");
-		parseUsers(temp);
+		rVal += parseUsers(temp);
 		sFilter.enableUserFiltering = 1;
 	}
 	if(myGetOpt(myArgV, temp, j, 'd') != -1)
 	{
-		printf("d specified\n");
-		printf("I got the date: %s\n", temp);
 		if(checkDate(temp) == 0)
 		{
 			parseDate(temp);
@@ -708,14 +608,13 @@ void parseCommand(char* command)
 		}
 		else
 		{
-			fprintf(stderr, "Error! Invalid date\n");
-			exit(-1);
+			rVal += checkDate(temp);
+			//fprintf(stderr, "Error! Invalid date\n");
+			//exit(-1);
 		}
 	}
-	if(myGetOpt(myArgV, temp, j, 'v') != -1)
+	if(myGetOpt(myArgV, temp, j, 't') != -1)
 	{
-		printf("I got the time: %s\n", temp);
-		printf("v specified\n");
 		if(checkTime(temp) == 0)
 		{
 			parseTime(temp);
@@ -723,53 +622,14 @@ void parseCommand(char* command)
 		}
 		else
 		{
-			fprintf(stderr, "Error! Invalid time\n");
-			exit(-1);
+			rVal += checkTime(temp);
+			//fprintf(stderr, "Error! Invalid time\n");
+			//exit(-1);
 		}
 	}
 	
-	/*
-	while((optionLetter = getopt((j + 1), (char* const*)myArgV, "u:d:t:")) != -1)
-        {
-		printf("option letter: %c\n", optionLetter);
-                switch(optionLetter)
-                {
-		case 'u':
-			parseUsers(optarg);
-			sFilter.enableUserFiltering = 1;
-			expArg += 2;
-                        break;
-                case 'd':
-			if(checkDate(optarg) == 0)
-			{
-				parseDate(optarg);
-				sFilter.enableDayFiltering = 1;
-			}
-			else
-			{
-				fprintf(stderr, "Error! Invalid date\n");
-				exit(-1);
-			}
-			expArg += 2;
-                        break;
-                case 't':
-			if(checkTime(optarg) == 0)
-			{
-				parseTime(optarg);
-				sFilter.enableTimeFiltering = 1;
-			}
-			else
-			{
-				fprintf(stderr, "Error! Invalid time\n");
-				exit(-1);
-			}
-			expArg += 2;
-                        break;
-                default:
-			break;
-                }
-        }
 
+	/*
 	if(j != expArg)
 	{
 		fprintf(stderr, "Error! Invalid number of program arguments\n");
@@ -777,7 +637,34 @@ void parseCommand(char* command)
 	}
 	*/
 
-	return;
+	/*
+	curTime_t = time(NULL);
+	curTime = localtime(&curTime_t);
+
+	if(sFilter.enableDayFiltering == 1)
+	{
+		if(sFilter.enableTimeFiltering == 0)
+		{
+			printf("Time filtering enabled\n");
+
+			strftime(timeBuff, sizeof(timeBuff), "%D", curTime); 
+			sFilter.enableDayFiltering = 1;
+			parseDate(timeBuff);
+		}
+	}
+	if(sFilter.enableTimeFiltering == 1)
+	{
+		if(sFilter.enableDayFiltering == 0)
+			printf("Date filtering enabled\n");
+		{
+			strftime(timeBuff, sizeof(timeBuff), "%H:%M", curTime); 
+			sFilter.enableTimeFiltering = 1;
+			parseTime(timeBuff);
+		}
+	}
+	*/
+
+	return rVal;
 }
 static void executeCommand(char *command, int socketFd,
                     struct sockaddr *socketAddress, socklen_t socketAddressLen, char* hostName)
@@ -790,6 +677,7 @@ static void executeCommand(char *command, int socketFd,
 	*/
 	size_t responseLength = 200;
 	int i;
+	int er;
 	//FILE* fPtr = popen(command, "r");
 
 	//if(fPtr != NULL)
@@ -810,20 +698,35 @@ static void executeCommand(char *command, int socketFd,
 		}
 		*/
 			
-	parseCommand(command);
+		er = parseCommand(command);
 
-		for(i = 0; i < EntryIndex; i++)
+		if(er == 0)
 		{
-			if(entryFilter(&EntryArray[i]) == 0)
+			for(i = 0; i < EntryIndex; i++)
 			{
-				printEntry(&EntryArray[i], response, hostName);
-				strcat(response, "\n");
-				responseLength = strlen(response);
-				sendto(socketFd, (void*)response, responseLength, 0, socketAddress, socketAddressLen);
+				if(entryFilter(&EntryArray[i]) == 0)
+				{
+					printEntry(&EntryArray[i], response, hostName);
+					strcat(response, "\n");
+					responseLength = strlen(response);
+					sendto(socketFd, (void*)response, responseLength, 0, socketAddress, socketAddressLen);
+				}
 			}
 		}
+		if((er & 1) == 1)
+		{
+			sendto(socketFd, (void*)"~Error! Invalid User\n", (strlen("~Error! Invalid User\n") + 1), 0, socketAddress, socketAddressLen);
+		}
+		if((er & 2) == 2)
+		{
+			sendto(socketFd, (void*)"~Error! Invalid Date\n", (strlen("~Error! Invalid Date\n") + 1), 0, socketAddress, socketAddressLen);
+		}
+		if((er & 4) == 4)
+		{
+			sendto(socketFd, (void*)"~Error! Invalid Time\n", (strlen("~Error! Invalid Time\n") + 1), 0, socketAddress, socketAddressLen);
+		}
+
 		sendto(socketFd, (void*)"END OF FILE", (strlen("END OF FILE") + 1), 0, socketAddress, socketAddressLen);
-		printf("End of file sent\n");
 		initFilter();
 	}
 	/*
@@ -839,21 +742,6 @@ static void executeCommand(char *command, int socketFd,
 
 static int initServer(int port)
 {
-    /*
-     * ASSIGNMENT
-     *
-     * Implement the following pseudocode:
-     *
-     * declare a "struct sockaddr_in" `inetSocketAddress`
-     * declare a "struct sockaddr" pointer and cast the address of 
-     *  `inetSocketAd dress` to it
-     * set `inetSockAddress`'s "sin_family" attribute to `AF_INET`
-     * set `inetSockAddress`'s "sin_addr.s_addr" attribute to
-     *  `INADDR_ANY`
-     * set `inetSockAddress`'s port attribute (you'll have to find the
-     *  exact name) to `port`
-	*/
-
 	struct sockaddr_in inetSockAddress;
 	struct sockaddr* addr = (struct sockaddr*)&inetSockAddress;
 
@@ -871,12 +759,6 @@ static int initServer(int port)
 		close(socketFd);
 		return -1;
 	}
-	
-	/*
-		int bind(int sockfd, const struct sockaddr *addr,
-               		 socklen_t addrlen);
-
-	*/
 }
 
 
@@ -907,7 +789,6 @@ void serve(char *hostName, int port)
 	{
 		commandLength = recvfrom(socketFd, (void*)command, COMMAND_SIZE, 0, (struct sockaddr*)socketAddress, &sp);
 		command[commandLength] = '\0';
-		printf("command: %s\n", command);
 		executeCommand(command, socketFd, (struct sockaddr*)socketAddress, sp, hostName);
 	}
 
@@ -940,14 +821,8 @@ static char *getDefaultHostName(void)
 
 int main(int argc, char* argv[])
 {
-	int i;
 	//struct Entry* tempArray;
-	int optionLetter;
 	sFilter.userNum = 0;
-	char timeBuff[20];
-	struct tm* curTime;
-	time_t curTime_t;
-	int expArg = 1;
     	int port = -1;
     	int ch;
     	char *hostName = NULL;
@@ -985,38 +860,6 @@ int main(int argc, char* argv[])
     if (runAsDaemon)
         daemonizeMe(argv[0]);
 
-	/*
-	if(argc != expArg)
-	{
-		fprintf(stderr, "Error! Invalid number of program arguments\n");
-		exit(-1);
-	}
-	*/
-	
-	curTime_t = time(NULL);
-	curTime = localtime(&curTime_t);
-
-	/*
-	if(sFilter.enableDayFiltering == 0)
-	{
-		if(sFilter.enableTimeFiltering == 1)
-		{
-			strftime(timeBuff, sizeof(timeBuff), "%D", curTime); 
-			sFilter.enableDayFiltering = 1;
-			parseDate(timeBuff);
-		}
-	}
-	else
-	{
-		if(sFilter.enableTimeFiltering == 0)
-		{  
-			strftime(timeBuff, sizeof(timeBuff), "%H:%M", curTime); 
-			sFilter.enableTimeFiltering = 1;
-			parseTime(timeBuff);
-		}
-	}
-	*/
-
 	EntryArray = (struct Entry*)malloc(sizeof(struct Entry) * ENTRY_INCR);
 	initFileDesc();
 
@@ -1038,6 +881,7 @@ int main(int argc, char* argv[])
 		}
 		*/
 	}
+
 
 	qsort(EntryArray, EntryIndex, sizeof(struct Entry), cmpFunc);
 
