@@ -481,10 +481,28 @@ int entryFilter(struct Entry* ePtr)
 		tempA->tm_mon = ePtr->loginTime.tm_mon;
 		tempA->tm_mday = ePtr->loginTime.tm_mday;
 		tempA->tm_year = ePtr->loginTime.tm_year;
+		tempA->tm_sec = 0;
+		tempA->tm_min = 0;
+		tempA->tm_hour = 0;
 
 		tempB->tm_mon = sFilter.time.tm_mon;
 		tempB->tm_mday = sFilter.time.tm_mday;
 		tempB->tm_year = sFilter.time.tm_year;
+		tempB->tm_sec = 0;
+		tempB->tm_min = 0;
+		tempB->tm_hour = 0;
+
+		/*
+int    tm_sec   seconds [0,61]
+int    tm_min   minutes [0,59]
+int    tm_hour  hour [0,23]
+int    tm_mday  day of month [1,31]
+int    tm_mon   month of year [0,11]
+int    tm_year  years since 1900
+int    tm_wday  day of week [0,6] (Sunday = 0)
+int    tm_yday  day of year [0,365]
+int    tm_isdst daylight savings flag
+		*/
 
 		/*
 		tempA->tm_hour = 0;
@@ -504,14 +522,14 @@ int entryFilter(struct Entry* ePtr)
 		beta = mktime(tempB);
 		dif = difftime(alpha, beta);
 
-		printf("alpha: %ld\nbeta: %ld\n", alpha, beta);
+		//printf("alpha: %ld\nbeta: %ld\n", alpha, beta);
 		if(dif == 0.0)
 		{
 			byDate = 0;
 		}
 		else
 		{
-			printf("dif: %lf\n\n", dif);
+			//printf("dif: %lf\n\n", dif);
 		}
 
 		/*
@@ -615,6 +633,10 @@ int entryFilter(struct Entry* ePtr)
 		byTime = 0;
 	}
 
+	if(byDate == 0)
+	{
+		printf("byTime: %d\nbyName: %d\n", byTime, byName);
+	}
 	if((byDate + byTime + byName) == 0)
 	{
 		rVal = 0;
@@ -723,6 +745,7 @@ int main(int argc, char* argv[])
 	curTime_t = time(NULL);
 	curTime = localtime(&curTime_t);
 
+	/*
 	if(sFilter.enableDayFiltering == 0)
 	{
 		if(sFilter.enableTimeFiltering == 1)
@@ -741,6 +764,7 @@ int main(int argc, char* argv[])
 			parseTime(timeBuff);
 		}
 	}
+	*/
 
 	EntryArray = (struct Entry*)malloc(sizeof(struct Entry) * ENTRY_INCR);
 	initFileDesc();

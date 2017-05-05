@@ -8,11 +8,24 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include<time.h>
 
 #include "syscall_check.h"
 #include "get_sockaddr.h"
 #include "client_server.h"
 
+#define MAX_ENTRIES 10000
+#define DBG printf("Here %d\n", BUGERATOR); BUGERATOR++;
+
+int BUGERATOR = 0;
+
+struct Entry
+{
+	char rawString[200];
+};
+
+struct Entry EntryArray[MAX_ENTRIES];
+int EntryIndex = 0;
 
 void remoteShell(char *host, char *command, int port)
 {
@@ -41,8 +54,6 @@ void remoteShell(char *host, char *command, int port)
 	int done = 0;
 	struct sockaddr_in inetSocketAddress;
 
-	printf("host: %s\n", host);
-
 	getInetSocketAddress(host, SOCK_DGRAM, port, &inetSocketAddress);
 	bind(socketFd, (struct sockaddr*)&inetSocketAddress, sizeof(struct sockaddr_in));
 	sendto(socketFd, command, (size_t)strlen(command), 0, (struct sockaddr*)&inetSocketAddress, sizeof(struct sockaddr));
@@ -57,49 +68,107 @@ void remoteShell(char *host, char *command, int port)
 		}
 		else
 		{
-			fwrite((void*)response, sizeof(char), responseLength, stdout);
+			//fwrite((void*)response, sizeof(char), responseLength, stdout);
+			response[responseLength] = '\0';
+			strcpy(EntryArray[EntryIndex].rawString, response);
+			EntryIndex++;
 		}
 	}
 	while(done == 0);
 
 
-	/*
-		size_t fwrite(const void *ptr, size_t size, size_t nmemb,
-                     FILE *stream);
+}
 
-	*/
-	/*
-	responseLength = recvfrom(socketFd, (void*)response, RESPONSE_SIZE, 0, (struct sockaddr*)&inetSocketAddress, &sp);
+void printEntries(void)
+{
+	int i;
+	int j;
+	int k;
+	char pString[200];
+	
+	for(i = 0; i < EntryIndex; i++)
+	{
+		for(j = 0, k = 0; j <= strlen(EntryArray[i].rawString); j++)
+		{
+			if(EntryArray[i].rawString[j] != '+')
+			{
+				pString[k] = EntryArray[i].rawString[j];
+				k++;
+			}
+		}
+		printf("%s", pString);
+	}
 
-ssize_t recvfrom(int socket, void *restrict buffer, size_t length,
-       int flags, struct sockaddr *restrict address,
-       socklen_t *restrict address_len);
+	return;
+}
 
-socket
-Specifies the socket file descriptor.
-buffer
-Points to the buffer where the message should be stored.
-length
-Specifies the length in bytes of the buffer pointed to by the buffer argument.
-flags
-Specifies the type of message reception. Values of this argument are formed by logically OR'ing zero or more of the following values:
-address
-A null pointer, or points to a sockaddr structure in which the sending address is to be stored. The length and format of the address depend on the address family of the socket.
-address_len
-Specifies the length of the sockaddr structure pointed to by the address argument.
 
-	*/
-	/*
-		int bind(int sockfd, const struct sockaddr *addr,
-               		 socklen_t addrlen);
+int cmpFunc(const void* alpha, const void* beta)
+{
+	int rVal = -1;;
+	int i, j;
+	time_t aTime;
+	time_t bTime;
+	struct tm aTM;
+	struct tm bTM;
+	double dif;
+	char temp[20];
 
-	*/
+	for(i = 0; i < strlen(((struct Entry*)alpha)->rawString); i++)
+	{
+		if(((struct Entry*)alpha)->rawString[i] == '+')
+		{
+			i++;
+			j = 0;
+			while(((struct Entry*)alpha)->rawString[i] != '+')
+			{
+				temp[j] = ((struct Entry*)alpha)->rawString[i]; 
+				j++;
+				i++;
+			}
+			strcpy(temp, "");
+		}
+	}
+	
+	strptime(temp, "%D", &aTM);
+	
+	for(i = 0; i < strlen(((struct Entry*)beta)->rawString); i++)
+	{
+		if(((struct Entry*)beta)->rawString[i] == '+')
+		{
+			i++;
+			j = 0;
+			while(((struct Entry*)beta)->rawString[i] != '+')
+			{
+				temp[j] = ((struct Entry*)beta)->rawString[i]; 
+				j++;
+				i++;
+			}
+			strcpy(temp, "");
+		}
+	}
 
-	/*
-		ssize_t sendto(int sockfd, const void *buf, size_t len, int flags,
-                      const struct sockaddr *dest_addr, socklen_t addrlen);
+	strptime(temp, "%D", &bTM);
 
-	*/
+	aTime = mktime(&aTM);
+	bTime = mktime(&bTM);
+
+	dif = difftime(aTime, bTime);
+
+	if(dif < 0.0)
+	{
+		rVal = 1;
+	}
+	else if(dif > 0.0)
+	{
+		rVal = -1;
+	}
+	else
+	{
+		rVal = 0;
+	}
+
+	return rVal;
 }
 
 int main(int argc, char *argv[])
@@ -108,13 +177,21 @@ int main(int argc, char *argv[])
     int ch;
 	int i, j;
 	int hosted = 0;
+	char command[500] = "";
 
-    while ((ch = getopt(argc, argv, "p:")) != -1) {
+    while ((ch = getopt(argc, argv, "u:d:t:p:")) != -1) {
         switch (ch) {
 
         case 'p':
             port = atoi(optarg);
             break;
+
+	case 'u':
+		break;
+	case 'd':
+		break;
+	case 't':
+		break;
 
         default:
             fprintf(stderr, "unknown option \"-%c\" -- exiting\n", ch);
@@ -128,12 +205,20 @@ int main(int argc, char *argv[])
 		{
 			for(j = (i + 1); j < argc; j++)
 			{
-				remoteShell(argv[j], "tattle", port);
+				remoteShell(argv[j], command, port);
 				hosted = 1;
 			}
 			i = argc + 1;
 		}
+		if(hosted == 0 && i != 0)
+		{
+			strcat(command, argv[i]);
+			strcat(command, "+");
+		}
 	}
+
+	qsort(EntryArray, EntryIndex, sizeof(struct Entry), cmpFunc);
+	printEntries();
 
 	if(hosted == 0)
 	{

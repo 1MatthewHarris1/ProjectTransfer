@@ -15,11 +15,11 @@ get_sockaddr.o: get_sockaddr.c
 get_sockaddr:	get_sockaddr.o
 	$(CC) -g -o get_sockaddr get_sockaddr.o
 
-remsh.o: remsh.c
+rtattle.o: rtattle.c
 	$(CC) -c $(CFLAGS) $< 
 
-remsh:	remsh.o get_sockaddr.o
-	$(CC) -g -o remsh remsh.o get_sockaddr.o
+rtattle:	rtattle.o get_sockaddr.o
+	$(CC) -g -o rtattle rtattle.o get_sockaddr.o
 
 tattled.o:	tattled.c get_sockaddr.c
 	$(CC) -c $(CFLAGS) $< 
@@ -34,14 +34,14 @@ daemonize_me.o:	daemonize_me.c
 .PHONY: clean
 clean:
 	rm -f ./sockaddr.o
-	rm -f ./remsh.o
-	rm -f ./remshd.o
+	rm -f ./rtattle.o
+	rm -f ./rtattled.o
 	rm -f ./daemonize_me.o
 	rm -f ./tattle.o
 
 .PHONY: immaculate
 immaculate: clean
 	rm -f ./get_sockaddr
-	rm -f ./remsh
-	rm -f ./remshd
+	rm -f ./rtattle
+	rm -f ./tattled
 	rm -f ./tattle
