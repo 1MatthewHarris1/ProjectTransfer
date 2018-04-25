@@ -1,0 +1,28 @@
+login:              line:     log on:               log off:          from host:            on host:
+------              -----     -------               --------          ----------            --------
+matthew.harris      pts/17    05/01/17 09:14     05/01/17 11:14     10.2.8.158     elec.tricity.wsu.edu
+matthew.harris      pts/2     05/01/17 07:45     05/01/17 08:10     71.95.121.132     elec.tricity.wsu.edu
+matthew.harris      pts/5     05/01/17 12:29     05/01/17 12:38     50.35.135.19     elec.tricity.wsu.edu
+matthew.harris      pts/5     05/03/17 11:59     05/03/17 12:15     10.2.8.158     elec.tricity.wsu.edu
+matthew.harris      pts/6     05/03/17 12:00     05/03/17 12:15     10.2.8.158     elec.tricity.wsu.edu
+matthew.harris      pts/8     05/03/17 13:32     05/03/17 13:51     10.2.8.158     elec.tricity.wsu.edu
+matthew.harris      pts/9     05/03/17 13:32     05/03/17 13:51     10.2.8.158     elec.tricity.wsu.edu
+matthew.harris      pts/19    05/03/17 22:56     05/04/17 00:34     71.95.121.132     elec.tricity.wsu.edu
+matthew.harris      pts/11    05/03/17 23:11     05/04/17 01:40     71.95.121.132     elec.tricity.wsu.edu
+matthew.harris      pts/30    05/04/17 14:28     05/04/17 16:49     10.2.8.158     elec.tricity.wsu.edu
+matthew.harris      pts/11    05/04/17 14:33     05/04/17 16:50     10.2.8.158     elec.tricity.wsu.edu
+matthew.harris      pts/20    05/04/17 14:52     05/04/17 18:09     10.2.8.158     elec.tricity.wsu.edu
+matthew.harris      pts/2     05/04/17 15:47     05/04/17 18:09     10.2.8.158     elec.tricity.wsu.edu
+matthew.harris      pts/21    05/04/17 23:13     05/05/17 03:42     71.95.121.132     elec.tricity.wsu.edu
+matthew.harris      pts/6     05/04/17 23:12     05/05/17 03:42     71.95.121.132     elec.tricity.wsu.edu
+matthew.harris      pts/2     05/05/17 02:26     05/05/17 05:01     50.35.135.19     elec.tricity.wsu.edu
+matthew.harris      pts/8     05/05/17 02:26     05/05/17 05:01     50.35.135.19     elec.tricity.wsu.edu
+matthew.harris      pts/0     05/05/17 02:56     05/05/17 02:57     50.35.135.19     elec.tricity.wsu.edu
+matthew.harris      pts/0     05/05/17 03:03     05/05/17 03:22     50.35.135.19     elec.tricity.wsu.edu
+matthew.harris      pts/0     05/05/17 05:01     05/05/17 05:01     50.35.135.19     elec.tricity.wsu.edu
+matthew.harris      pts/28    05/05/17 10:01     (still logged in)     10.2.8.158     elec.tricity.wsu.edu
+matthew.harris      pts/29    05/05/17 10:01     (still logged in)     10.2.8.158     elec.tricity.wsu.edu
+matthew.harris      pts/9     05/05/17 16:31     05/05/17 16:48     71.95.121.132     elec.tricity.wsu.edu
+matthew.harris      pts/17    05/05/17 16:32     (still logged in)     71.95.121.132     elec.tricity.wsu.edu
+matthew.harris      pts/5     05/05/17 17:04     (still logged in)     50.35.135.19     elec.tricity.wsu.edu
+matthew.harris      pts/6     05/05/17 17:05     (still logged in)     50.35.135.19     elec.tricity.wsu.edu

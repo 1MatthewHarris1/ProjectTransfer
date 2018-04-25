@@ -1,0 +1,6 @@
+in file "users.c", line 216,
+  failed system call: stat(path, &stObj)
+  errno: 13
+  message: Permission denied
+  consequence: exiting
+ERROR

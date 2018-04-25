@@ -1,0 +1,109 @@
+#!/bin/sh
+
+testcount=0
+root=/tmp/$$
+dirs="d000 d777 d1755 d666"
+dir_ops="cd delete ls read search write"
+
+files="f600 f777 f222"
+file_ops="execute ls read write"
+
+# create directories
+mkdir $root
+chmod 777 $root
+for dir in $dirs
+do
+	mkdir $root/$dir
+	prot="$(echo $dir | sed 's/^d//')"
+	chmod $prot $root/$dir
+done
+
+# directory tests
+for dir in $dirs
+do
+	for op in $dir_ops
+	do
+		cmd="/cslab/bin/whocan $op $root/$dir"
+		echo "test $testcount: /cslab/bin/whocan $op $dir"
+		if $cmd 2>&1
+		then
+			echo "OK"
+		else
+			echo "ERROR"
+		fi	
+		echo
+		testcount=$(expr $testcount + 1)
+	done
+done
+
+#create files
+
+for file in $files
+do 
+	touch $root/$file
+	prot="$(echo $file | set 's/^f//')"
+	chmod $prot $root/$file
+done
+
+#file tests
+for file in $files
+do
+	for file_op in $file_ops
+	do
+		cmd="/cslab/bin/whocan $file_op $root/$file"
+		echo "test $testcount: whocan $file_op $file"
+		if $cmd 2>&1
+		then
+			echo "OK"
+		else
+			echo "ERROR"
+		fi
+		echo
+		testcount=$(expr $testcount + 1)
+	done
+done
+
+# clean up and start over
+chmod -R 777 $root
+rm -rf $root
+mkdir $root
+chmod 777 $root
+
+#create files *in* subdirectories of $root
+for dir in $dirs
+do
+	mkdir $root/$dir
+	for file in $files
+	do
+		touch $root/$dir/$file
+		prot=$(echo $file | sed 's/^f//')
+		chmod $prot $root/$dir/$file
+	done
+	prot=$(echo $dir | sed 's/^d//')
+	chmod $prot $root/$dir
+done
+
+# "file in directory" tests
+for dir in $dirs
+do
+	for file in $files
+	do
+		for file_op in $file_ops
+		do
+			cmd="/cslab/bin/whocan $file_op $root/$dir/$file"
+			echo "test $testcount: whocan $file_op $file"
+			if $cmd 2>&1
+			then
+				echo "OK"
+			else
+				echo "ERROR"
+			fi
+			echo
+			testcount=$(expr $testcount + 1)
+		done
+	done
+done
+
+# clean up
+chmod -R 777 $root
+rm -rf $root
